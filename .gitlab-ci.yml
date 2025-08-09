@@ -1,0 +1,322 @@
+image: docker:24.0.2
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+before_script:
+  # Log in to the LRZ GitLab Container Registry
+  echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+
+stages:
+  - build
+  - test
+  - package
+  - publish
+  - deploy
+
+# ──────────────────────────────────────────
+# 1) BUILD STAGE
+# ──────────────────────────────────────────
+build-api-gateway:
+  stage: build
+  script:
+    - echo "Building api-gateway microservice"
+    - cd project/api-gateway
+    - mvn clean compile
+  artifacts:
+    paths:
+      - project/api-gateway/target/*.jar
+  only:
+    refs:
+      - main
+    changes:
+      - project/api-gateway/**/*
+
+build-compiler:
+  stage: build
+  script:
+    - echo "Building compiler microservice"
+    - cd project/compiler
+    - mvn clean compile
+  artifacts:
+    paths:
+      - project/compiler/target/*.jar
+  only:
+    refs:
+      - main
+    changes:
+      - project/compiler/**/*
+
+build-darkmode:
+  stage: build
+  script:
+    - echo "Building darkmode microservice"
+    - cd project/darkmode
+    - mvn clean compile
+  artifacts:
+    paths:
+      - project/darkmode/target/*.jar
+  only:
+    refs:
+      - main
+    changes:
+      - project/darkmode/**/*
+
+build-frontend:
+  stage: build
+  script:
+    - echo "Building frontend microservice"
+    - cd project/frontend/ui-service
+    - mvn clean compile
+  artifacts:
+    paths:
+      - project/frontend/ui-service/target/*.jar
+  only:
+    refs:
+      - main
+    changes:
+      - project/frontend/**/*
+
+build-project:
+  stage: build
+  script:
+    - echo "Building project microservice"
+    - cd project/project
+    - mvn clean compile
+  artifacts:
+    paths:
+      - project/project/target/*.jar
+  only:
+    refs:
+      - main
+    changes:
+      - project/project/**/*
+
+build-service-discovery:
+  stage: build
+  script:
+    - echo "Building service-discovery microservice"
+    - cd project/service-discovery
+    - mvn clean compile
+  artifacts:
+    paths:
+      - project/service-discovery/target/*.jar
+  only:
+    refs:
+      - main
+    changes:
+      - project/service-discovery/**/*
+
+
+# ──────────────────────────────────────────
+# 3) TEST STAGE
+#  (Docker test each microservice image)
+# ──────────────────────────────────────────
+test-compiler:
+  stage: test
+  script:
+    - echo "Running tests in /project/compiler"
+    - cd project/compiler
+    - mvn test
+
+test-darkmode:
+  stage: test
+  script:
+    - echo "Running tests in /project/darkmode"
+    - cd project/darkmode
+    - mvn test
+
+test-project:
+  stage: test
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_DB: testdb
+    POSTGRES_USER: testuser
+    POSTGRES_PASSWORD: testpassword
+    SPRING_PROFILES_ACTIVE: ci
+  script:
+    - echo "Running tests in /project/project "
+    - cd project/project
+    - mvn test -Dspring.profiles.active=dev
+
+
+# ──────────────────────────────────────────
+# 3) PACKAGE STAGE
+#  (Docker build each microservice image)
+# ──────────────────────────────────────────
+package-api-gateway:
+  stage: package
+  script:
+    - echo "Packaging Docker image for api-gateway"
+    - cd project/api-gateway
+    - mvn package -DskipTests
+  only:
+    refs:
+      - main
+    changes:
+      - project/api-gateway/**/*
+
+package-compiler:
+  stage: package
+  script:
+    - echo "Packaging Docker image for compiler"
+    - cd project/compiler
+    - mvn package -DskipTests
+  only:
+    refs:
+      - main
+    changes:
+      - project/compiler/**/*
+
+package-darkmode:
+  stage: package
+  script:
+    - echo "Packaging Docker image for darkmode"
+    - cd project/darkmode
+    - mvn package -DskipTests
+  only:
+    refs:
+      - main
+    changes:
+      - project/darkmode/**/*
+
+package-frontend:
+  stage: package
+  script:
+    - echo "Packaging Docker image for frontend"
+    - cd project/frontend/ui-service
+    - mvn package -DskipTests
+  only:
+    refs:
+      - main
+    changes:
+      - project/frontend/**/*
+
+package-project:
+  stage: package
+  script:
+    - echo "Packaging Docker image for project"
+    - cd project/project
+    - mvn package -DskipTests
+  only:
+    refs:
+      - main
+    changes:
+      - project/project/**/*
+
+package-service-discovery:
+  stage: package
+  script:
+    - echo "Packaging Docker image for service-discovery"
+    - cd project/service-discovery
+    - mvn package -DskipTests
+  only:
+    refs:
+      - main
+    changes:
+      - project/service-discovery/**/*
+
+# ──────────────────────────────────────────
+# 4) PUBLISH STAGE
+#  (Push Docker images to LRZ GitLab Registry)
+# ──────────────────────────────────────────
+publish-api-gateway:
+  stage: publish
+  script:
+    - echo "Pushing api-gateway image"
+    - cd project/api-gateway
+    - docker build -t "$CI_REGISTRY/ase24-group-n/as-2024-exercise/api-gateway:latest" .
+    - docker push "$CI_REGISTRY/ase24-group-n/as-2024-exercise/api-gateway:latest"
+  only:
+    refs:
+      - main
+    changes:
+      - project/api-gateway/**/*
+
+publish-compiler:
+  stage: publish
+  script:
+    - echo "Pushing compiler image"
+    - cd project/compiler
+    - docker build -t "$CI_REGISTRY/ase24-group-n/as-2024-exercise/compiler:latest" .
+    - docker push "$CI_REGISTRY/ase24-group-n/as-2024-exercise/compiler:latest"
+  only:
+    refs:
+      - main
+    changes:
+      - project/compiler/**/*
+
+publish-darkmode:
+  stage: publish
+  script:
+    - echo "Pushing darkmode image"
+    - cd project/darkmode
+    - docker build -t "$CI_REGISTRY/ase24-group-n/as-2024-exercise/darkmode:latest" .
+    - docker push "$CI_REGISTRY/ase24-group-n/as-2024-exercise/darkmode:latest"
+  only:
+    refs:
+      - main
+    changes:
+      - project/darkmode/**/*
+
+publish-frontend:
+  stage: publish
+  script:
+    - echo "Pushing frontend image"
+    - cd project/frontend/ui-service
+    - docker build -t "$CI_REGISTRY/ase24-group-n/as-2024-exercise/frontend:latest" .
+    - docker push "$CI_REGISTRY/ase24-group-n/as-2024-exercise/frontend:latest"
+  only:
+    refs:
+      - main
+    changes:
+      - project/frontend/**/*
+
+publish-project:
+  stage: publish
+  script:
+    - echo "Pushing project image"
+    - cd project/project
+    - docker build -t "$CI_REGISTRY/ase24-group-n/as-2024-exercise/project:latest" .
+    - docker push "$CI_REGISTRY/ase24-group-n/as-2024-exercise/project:latest"
+  only:
+    refs:
+      - main
+    changes:
+      - project/project/**/*
+
+publish-service-discovery:
+  stage: publish
+  script:
+    - echo "Pushing service-discovery image"
+    - cd project/service-discovery
+    - docker build -t "$CI_REGISTRY/ase24-group-n/as-2024-exercise/service-discovery:latest" .
+    - docker push "$CI_REGISTRY/ase24-group-n/as-2024-exercise/service-discovery:latest"
+  only:
+    refs:
+      - main
+    changes:
+      - project/service-discovery/**/*
+
+
+# ──────────────────────────────────────────
+# 5) DEPLOY STAGE
+#  (Pull & run the images on your GCP VM via SSH)
+# ──────────────────────────────────────────
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying all services to GCP VM via SSH"
+    # 3) SSH into your GCP VM & run docker compose
+    - scp -i ~/.ssh/atseKey -o StrictHostKeyChecking=no project/docker-compose.prod.yml ase2025gruppen@34.71.213.94:/home/ase2025gruppen/compose/docker-compose.yml
+    - ssh -i ~/.ssh/atseKey -o StrictHostKeyChecking=no ase2025gruppen@34.71.213.94 "
+      echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin &&
+      cd /home/ase2025gruppen/compose &&
+      docker-compose pull &&
+      docker-compose up -d
+      "
+  environment:
+    name: production
+  only:
+    - main

@@ -1,0 +1,8 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          client-id: "1a8267c12e72245e933f2634391aa837aa3e45d2e768cc17b6a32da943c575c8"
+          client-secret: "gloas-24bd0dbad1c3f62008e76a2e0026f49ce3c5552281c41d81021bd98f8a2e830a"
+          introspection-uri: https://gitlab.lrz.de/oauth/introspect

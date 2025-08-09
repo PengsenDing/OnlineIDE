@@ -1,0 +1,20 @@
+<nav class="navbar navbar-expand-lg bg-secondary">
+    <a class="ms-2 navbar-brand" href="#">Online-IDE</a>
+    <a class="navbar-text px-1" href="/ui/projects">Projects</a>
+
+    <div class="ms-auto d-flex align-items-center gap-4">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="darkModeToggle" [value]="darkModeService.isDarkMode()" (click)="darkModeService.toggleDarkMode()">
+            <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+        </div>
+
+        @if (!(authService.authenticated | async)) {
+            <button class="me-2 btn btn-primary btn-sm" (click)="authService.login()">Login</button>
+        } @else {
+            <button class="me-2 btn btn-primary btn-sm" (click)="authService.logout()">Logout</button>
+        }
+    </div>
+</nav>
+<div class="m-2 mt-4">
+    <router-outlet/>
+</div>

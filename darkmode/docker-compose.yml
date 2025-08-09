@@ -1,0 +1,5 @@
+services:
+  darkmode-api:
+    build:
+      context: .
+      dockerfile: Dockerfile

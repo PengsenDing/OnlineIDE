@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: "oauth-client"
+  security:
+    oauth2:
+      client:
+        provider:
+          gitlab:
+            authorization-uri: https://gitlab.lrz.de/oauth/authorize
+            token-uri: https://gitlab.lrz.de/oauth/token
+            user-info-uri: https://gitlab.lrz.de/api/v4/user
+            user-name-attribute: username
+        registration:
+          gitlab:
+            provider: gitlab
+            redirect-uri: http://localhost:8084/login/oauth2/code/gitlab
+            authorization-grant-type: authorization_code
+            client-id: "bb3752299b42433b553ad36c32e728af4025132261dc45c6b568495f1ea36612"
+            client-secret: "gloas-9d0bde18c07ec380d54672a8fb6838a472fa05281f9cd3a8dfbb5674e2040ce0"
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://service-discovery:8761/eureka}

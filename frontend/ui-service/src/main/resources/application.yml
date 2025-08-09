@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: "ui-service"
+
+  web:
+    resources:
+      static-locations: "classpath:/static/browser/"
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://service-discovery:8761/eureka}

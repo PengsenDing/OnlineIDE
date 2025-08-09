@@ -1,0 +1,40 @@
+services:
+  service-discovery:
+    extends:
+      file: ./service-discovery/docker-compose.yml
+      service: service-discovery
+  api-gateway:
+    extends:
+      file: ./api-gateway/docker-compose.yml
+      service: api-gateway
+    environment:
+      - MODE=${MODE:-dev}
+  darkmode-api:
+    extends:
+      file: ./darkmode/docker-compose.yml
+      service: darkmode-api
+  project-api:
+    extends:
+      file: ./project/docker-compose.yml
+      service: project-api
+    environment:
+      - MODE=${MODE:-dev}
+  project-db:
+    extends:
+      file: ./project/docker-compose.yml
+      service: project-db
+  frontend:
+    extends:
+      file: ./frontend/ui-service/docker-compose.yml
+      service: frontend
+  compiler-api:
+    extends:
+      file: ./compiler/docker-compose.yml
+      service: compiler-api
+  oauth-client:
+    extends:
+      file: ./oauth-client/docker-compose.yml
+      service: oauth-client
+
+volumes:
+  pgdata:

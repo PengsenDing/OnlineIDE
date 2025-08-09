@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: compiler
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://service-discovery:8761/eureka}

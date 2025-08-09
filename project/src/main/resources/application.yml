@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: project
+
+  jpa:
+    properties:
+      hibernate:
+        # Specifying the SQL dialect makes Hibernate generate better SQL for the chosen database
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            # fixes Hibernate issue : https :// github . com / spring - projects / spring - boot / issues /12007
+            non_contextual_creation: true
+    # Hibernate ddl auto ( create , create - drop , validate , update )
+    # ‘ddl - auto ‘ property is used to automatically create
+    # the tables based on the entity classes
+    hibernate:
+      ddl-auto: update
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://service-discovery:8761/eureka}

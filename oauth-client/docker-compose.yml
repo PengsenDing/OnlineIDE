@@ -1,0 +1,5 @@
+services:
+  oauth-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
